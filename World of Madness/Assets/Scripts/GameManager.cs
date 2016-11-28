@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 
 public class GameManager : MonoBehaviour {
-  public GameObject camera;
+  public Camera camera;
   public GameObject plane;
   public GameObject wall;
   public GameObject player1prefab;
@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour {
   private int numCols = 10;
   private int currentRow;
   private int mapPointer;
+  private float cameraTop;
+  private float cameraBottom;
   private int[,] gameMap = new int[30,10];
   private enum Objects{PLANE, WALL, PLAYER_1, PLAYER_2, TRAP, HOLE};
 
@@ -44,7 +46,7 @@ public class GameManager : MonoBehaviour {
       for (int zVal = 0; zVal < numCols; zVal++) {
         instantiateObject(gameMap[mapPointer, zVal],currentRow, zVal);
       }
-      mapPointer = (mapPointer + 1 > 30) ? 0 : ++mapPointer;
+      mapPointer = (mapPointer + 1 == 30) ? 3 : ++mapPointer;
       currentRow++;
     }
   }
@@ -85,7 +87,11 @@ public class GameManager : MonoBehaviour {
   }
 
   public void alterMapAsNeeded() {
-
+    cameraTop = camera.transform.position.x + (camera.fieldOfView * 0.5f);
+    cameraBottom = camera.transform.position.x - (camera.fieldOfView * 0.5f);
+    if((currentRow * 10) < player1.transform.position.x + 50 || (currentRow * 10) < player2.transform.position.x + 50) {
+      generateRowsOfMap (5);
+    }
   }
 
 	void Update () {
