@@ -12,42 +12,39 @@ public class GameManager : MonoBehaviour {
   private GameObject player1;
   private GameObject player2;
   private float cameraMoveSpeed = 15.0f;
-  private int maxRowsToDisplay = 10;
   private int numCols = 10;
   private int currentRow;
+  private int mapPointer;
   private int[,] gameMap = new int[30,10];
   private enum Objects{PLANE, WALL, PLAYER_1, PLAYER_2, TRAP, HOLE};
 
 	void Start () {
     currentRow = 0;
+    mapPointer = 0;
     loadMapFromFile("Maps/map_layout.txt");
-    generatePlane();
-    generateObjectsInRows(0, maxRowsToDisplay);
+    generateRowsOfMap(10);
 	}
 
   private void loadMapFromFile(string fileName) {
     string row;
     StreamReader mapReader = new StreamReader(Application.dataPath + "/" + fileName, Encoding.Default);
-    int currentRow = 0;
+    int rowIdx = 0;
     while ((row = mapReader.ReadLine()) != null) {
       for (int column = 0; column < row.Length; column++) {
-        gameMap[currentRow,column] = convertCharToIntFast(row[column]);
+        gameMap[rowIdx,column] = convertCharToIntFast(row[column]);
       }
-      currentRow++;
+      rowIdx++;
     }
   }
 
-  private void generatePlane() {
-    for (int i = 0; i < 10; i++) {
-      Instantiate(plane, new Vector3(i*10.0f, 0,0), Quaternion.identity);
-    }
-  }
-
-  private void generateObjectsInRows(int beginIdx, int endIdx) {
-    for (int i = beginIdx; i < endIdx; i++) {
-      for (int x = 0; x < numCols; x++) {
-        instantiateObject(gameMap[i,x],i,x);
+  private void generateRowsOfMap(int amountOfRows) {
+    int endpoint = currentRow + amountOfRows;
+    while (currentRow < endpoint) {
+      Instantiate(plane, new Vector3(currentRow*10.0f, 0,0), Quaternion.identity);
+      for (int zVal = 0; zVal < numCols; zVal++) {
+        instantiateObject(gameMap[mapPointer, zVal],currentRow, zVal);
       }
+      mapPointer = (mapPointer + 1 > 30) ? 0 : ++mapPointer;
       currentRow++;
     }
   }
@@ -87,7 +84,12 @@ public class GameManager : MonoBehaviour {
     camera.transform.position = new Vector3(newXVal, camera.transform.position.y, camera.transform.position.z);
   }
 
+  public void alterMapAsNeeded() {
+
+  }
+
 	void Update () {
     adjustCameraView();
+    alterMapAsNeeded();
   }
 }
